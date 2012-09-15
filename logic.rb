@@ -1,13 +1,8 @@
-def choose_tile_to_slide(current_board, solved_board)
-    mobile_tiles(current_board).sample
+def start(current_board, solved_board)
+  # Perform initialisation
 end
 
-def mobile_tiles(board)
-    result = []
-    (0..board.size - 1).each do |row|
-        (0..board.size - 1).each do |column|
-            result << [row, column] if board.can_slide?(row, column)
-        end
-    end
-    result
+def choose_tile_to_slide(current_board, solved_board)
+  # Return the tile to slide (identified by its position, as a Point)
+  current_board.points_adjacent_to_gap.sample
 end

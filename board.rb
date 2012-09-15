@@ -1,6 +1,8 @@
+require 'point'
+
 class Board
 
-    attr_reader :gap_column, :gap_row
+    attr_reader :gap
 
     def self.generate(size)
         tiles = []
@@ -10,11 +12,9 @@ class Board
             tiles << (first_tile_in_row..last_tile_in_row).to_a
         end
 
-        gap_column = size - 1
-        gap_row = size - 1
-        tiles[gap_column][gap_row] = nil
+        tiles[size - 1][size - 1] = nil
 
-        Board.new( tiles )
+        Board.new(tiles)
     end
 
     # The size of the board; i.e. the width or height, in tiles.
@@ -23,35 +23,51 @@ class Board
     end
 
     # Returns the number of the tile at the given position, nil for the empty space.
-    def get(row, column)
-        tiles[row][column]
+    def get(point)
+        tiles[point.row][point.column]
     end
 
     # Returns a new Board where the given tile has been moved into the empty space.
-    def slide(row, column)
-        result = dup
-        result.slide!(row, column)
-        result
+    def slide(point)
+        dup.slide!(point)
     end
 
     # Slides the tile, modifying the current Board instance.
-    def slide!(row, column)
-        raise "(#{row}, #{column}) is not on the board" if not on_board?(row, column)
-        raise "Can't slide #{get(row, column)} (row=#{row}, col=#{column}) into the empty space" if not can_slide?(row, column)
+    def slide!(point)
+        raise "#{point} is not on the board" if not on_board?(point)
+        if not can_slide?(point)
+            raise "Can't slide tile '#{get(point)}' at #{point} into the empty space in board:\n#{self}"
+        end
 
-        tiles[gap_row][gap_column] = get(row, column)
-        tiles[row][column] = nil
-        @gap_column = column
-        @gap_row = row
+        tiles[gap.row][gap.column] = get(point)
+        tiles[point.row][point.column] = nil
+        @gap = point
+
+        self
     end
 
-    def can_slide?(row, column)
-        (row == gap_row || column == gap_column) && !(row == gap_row && column == gap_column) && 
-            (row - gap_row).abs <= 1 && (column - gap_column).abs <= 1
+    def on_board?(point)
+        point.column >= 0 && point.column < size && point.row >= 0 && point.row < size
     end
 
-    def on_board?(x, y)
-        x < size && y < size
+    def can_slide?(point)
+        points_adjacent_to_gap.include?(point)
+    end
+
+    def points_adjacent_to_gap
+        north = gap + Point.new(0, 1)
+        south = gap - Point.new(0, 1)
+        east = gap + Point.new(1, 0)
+        west = gap - Point.new(1, 0)
+
+        result = []
+
+        result << north if on_board?(north)
+        result << south if on_board?(south)
+        result << east if on_board?(east)
+        result << west if on_board?(west)
+
+        result
     end
 
     def dup
@@ -66,7 +82,7 @@ class Board
     def to_s
         line = "-" + "----" * size
         result = ""
-        result << line 
+        result << line
         @tiles.each do |row|
             result << "\n| "
             row.each { |tile| result << "#{tile || ' '} | " }
@@ -80,17 +96,17 @@ class Board
         Board.new(tiles.map { |row| row.shuffle })
     end
 
-    protected 
+    protected
 
     attr_reader :tiles
 
     def initialize(tiles)
         @tiles = tiles
 
-        tiles.each_index do |r|
-            @gap_column = tiles[r].index(nil)
-            if @gap_column
-                @gap_row = r
+        tiles.each_index do |row|
+            gap_column = tiles[row].index(nil)
+            if gap_column
+                @gap = Point.new(gap_column, row)
                 break
             end
         end
