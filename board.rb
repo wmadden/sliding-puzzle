@@ -92,8 +92,14 @@ class Board
         result
     end
 
-    def shuffle
-        Board.new(tiles.map { |row| row.shuffle })
+    def shuffle(amount = 1000)
+        result = dup
+
+        amount.times do
+            result.slide!(result.points_adjacent_to_gap.sample)
+        end
+
+        result
     end
 
     protected
