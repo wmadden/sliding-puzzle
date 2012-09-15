@@ -71,7 +71,7 @@ class Board
     end
 
     def dup
-        Board.new(@tiles.dup)
+        Board.new(@tiles.map { |row| row.dup })
     end
 
     def ==(board)
