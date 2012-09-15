@@ -19,6 +19,8 @@ def print_move(tile_to_slide)
     puts "#{@number_of_moves}: #{current_tile_value} (#{tile_to_slide[0]}, #{tile_to_slide[1]}) -> (#{@unsolved_board.gap_column}, #{@unsolved_board.gap_row})"
 end
 
+start(@unsolved_board.dup, @solved_board.dup)
+
 while (@unsolved_board != @solved_board)
     print_current_state
     
