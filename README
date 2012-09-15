@@ -1,0 +1,6 @@
+Sliding Puzzle Simulator
+------------------------
+
+Modify the logic in logic.rb to implement your solver for the sliding puzzle.
+
+Run it against a random board with ./runner.
