@@ -1,5 +1,5 @@
-def choose_tile_to_slide(board)
-    mobile_tiles(board).sample
+def choose_tile_to_slide(current_board, solved_board)
+    mobile_tiles(current_board).sample
 end
 
 def mobile_tiles(board)

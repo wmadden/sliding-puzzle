@@ -22,7 +22,7 @@ end
 while (@unsolved_board != @solved_board)
     print_current_state
     
-    tile_to_slide = choose_tile_to_slide(@unsolved_board)
+    tile_to_slide = choose_tile_to_slide(@unsolved_board.dup, @solved_board.dup)
 
     print_move(tile_to_slide)
 
