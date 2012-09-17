@@ -6,7 +6,7 @@ $: << '.'
 require 'board'
 require 'logic'
 
-@solved_board = Board.generate(3)
+@solved_board = Board.generate(2)
 @unsolved_board = @solved_board.shuffle
 @number_of_moves = 0
 
@@ -14,9 +14,8 @@ def print_current_state
     puts @unsolved_board
 end
 
-def print_move(tile_to_slide)
-    current_tile_value = @unsolved_board.get(tile_to_slide)
-    puts "#{@number_of_moves}: #{current_tile_value} #{tile_to_slide} -> #{@unsolved_board.gap}"
+def print_move(tile)
+    puts "#{@number_of_moves}: #{tile} #{@unsolved_board.position_of(tile)} -> #{@unsolved_board.gap}"
 end
 
 print_current_state
@@ -24,11 +23,11 @@ print_current_state
 start(@unsolved_board.dup, @solved_board.dup)
 
 while (@unsolved_board != @solved_board)
-    tile_to_slide = choose_tile_to_slide(@unsolved_board.dup, @solved_board.dup)
+    tile_to_slide = choose_tile_to_slide(@unsolved_board, @solved_board)
 
     print_move(tile_to_slide)
 
-    @unsolved_board.slide!(tile_to_slide)
+    @unsolved_board = @unsolved_board.slide(tile_to_slide)
     @number_of_moves += 1
 
     print_current_state

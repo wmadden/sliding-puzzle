@@ -2,14 +2,18 @@ require 'point'
 
 class Board
 
-    attr_reader :gap
-
     def self.generate(size)
         tiles = []
-        (1..size).each do |r|
-            first_tile_in_row = ((r - 1) * size + 1)
-            last_tile_in_row = first_tile_in_row + size - 1
-            tiles << (first_tile_in_row..last_tile_in_row).to_a
+        positions_of_tiles = {}
+
+        tile = 1
+        (0..size - 1).each do |row|
+            tiles.push([])
+            (0..size - 1).each do |column|
+                tiles[row].push(tile)
+                positions_of_tiles[tile] = Point.new(column, row)
+                tile += 1
+            end
         end
 
         tiles[size - 1][size - 1] = nil
@@ -27,45 +31,51 @@ class Board
         tiles[point.row][point.column]
     end
 
-    # Returns a new Board where the given tile has been moved into the empty space.
-    def slide(point)
-        dup.slide!(point)
+    # Returns a new Board where the given tile (identified by its number value) has been moved into the empty space.
+    #
+    # Example:
+    #   ---------
+    #   | 1 | 2 |
+    #   ---------
+    #   | 3 |   |
+    #   ---------
+    #
+    # slide(3) yields
+    #
+    #   ---------
+    #   | 1 | 2 |
+    #   ---------
+    #   |   | 3 |
+    #   ---------
+    #
+    def slide(tile)
+        dup.slide!(tile)
     end
 
-    # Slides the tile, modifying the current Board instance.
-    def slide!(point)
-        raise "#{point} is not on the board" if not on_board?(point)
-        if not can_slide?(point)
-            raise "Can't slide tile '#{get(point)}' at #{point} into the empty space in board:\n#{self}"
-        end
-
-        tiles[gap.row][gap.column] = get(point)
-        tiles[point.row][point.column] = nil
-        @gap = point
-
-        self
+    def position_of(tile)
+        @positions_of_tiles[tile]
     end
 
-    def on_board?(point)
-        point.column >= 0 && point.column < size && point.row >= 0 && point.row < size
+    def can_slide?(tile)
+        movable_tiles.include?(tile)
     end
 
-    def can_slide?(point)
-        points_adjacent_to_gap.include?(point)
+    def gap
+        position_of(nil)
     end
 
-    def points_adjacent_to_gap
-        north = gap + Point.new(0, 1)
-        south = gap - Point.new(0, 1)
+    def movable_tiles
+        north = gap - Point.new(0, 1)
+        south = gap + Point.new(0, 1)
         east = gap + Point.new(1, 0)
         west = gap - Point.new(1, 0)
 
         result = []
 
-        result << north if on_board?(north)
-        result << south if on_board?(south)
-        result << east if on_board?(east)
-        result << west if on_board?(west)
+        result << get(north) if north.row >= 0
+        result << get(south) if south.row < size
+        result << get(east) if east.column < size
+        result << get(west) if west.column >= 0
 
         result
     end
@@ -81,7 +91,7 @@ class Board
 
     def to_s
         line = "-" + "----" * size
-        result = ""
+        result = "\n"
         result << line
         @tiles.each do |row|
             result << "\n| "
@@ -96,7 +106,7 @@ class Board
         result = dup
 
         amount.times do
-            result.slide!(result.points_adjacent_to_gap.sample)
+            result.slide!(result.movable_tiles.sample)
         end
 
         result
@@ -108,14 +118,34 @@ class Board
 
     def initialize(tiles)
         @tiles = tiles
+        @positions_of_tiles = {}
 
         tiles.each_index do |row|
-            gap_column = tiles[row].index(nil)
-            if gap_column
-                @gap = Point.new(gap_column, row)
-                break
+            tiles[row].each_index do |column|
+                tile = tiles[row][column]
+                @positions_of_tiles[tile] = Point.new(column, row)
             end
         end
+    end
+
+    def set(point, value)
+        @tiles[point.row][point.column] = value
+        @positions_of_tiles[value] = point
+    end
+
+    # Slides the tile, modifying the current Board instance.
+    def slide!(tile)
+        if not can_slide?(tile)
+            raise "Can't slide tile '#{tile}' at #{position_of(tile)} into the empty space #{gap} in board:\n#{self}"
+        end
+
+        position_of_tile = position_of(tile)
+        position_of_gap = position_of(nil)
+
+        set(position_of_tile, nil)
+        set(position_of_gap, tile)
+
+        self
     end
 
 end
