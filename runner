@@ -7,17 +7,23 @@ require 'board'
 require 'logic'
 
 @solved_board = Board.generate(2)
-@unsolved_board = @solved_board.shuffle
+@amount_shuffled = 1000
+@unsolved_board = @solved_board.shuffle(@amount_shuffled)
 @number_of_moves = 0
 
 def print_current_state
     puts @unsolved_board
+    puts
+    puts "-" * 20
+    puts
 end
 
 def print_move(tile)
     puts "#{@number_of_moves}: #{tile} #{@unsolved_board.position_of(tile)} -> #{@unsolved_board.gap}"
 end
 
+puts
+puts "Opening State:"
 print_current_state
 
 start(@unsolved_board.dup, @solved_board.dup)
@@ -35,4 +41,4 @@ end
 
 puts
 puts "Total number of moves:  #{@number_of_moves}"
-puts "Total number of slides: #{Board.slide_calls}"
+puts "Total number of slides: #{Board.slide_calls - @amount_shuffled}"
