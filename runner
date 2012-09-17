@@ -32,3 +32,7 @@ while (@unsolved_board != @solved_board)
 
     print_current_state
 end
+
+puts
+puts "Total number of moves:  #{@number_of_moves}"
+puts "Total number of slides: #{Board.slide_calls}"

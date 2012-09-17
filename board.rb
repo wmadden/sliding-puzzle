@@ -2,6 +2,12 @@ require 'point'
 
 class Board
 
+    @@slide_calls = 0
+
+    def self.slide_calls
+        @@slide_calls
+    end
+
     def self.generate(size)
         tiles = []
         positions_of_tiles = {}
@@ -135,6 +141,8 @@ class Board
 
     # Slides the tile, modifying the current Board instance.
     def slide!(tile)
+        @@slide_calls += 1
+
         if not can_slide?(tile)
             raise "Can't slide tile '#{tile}' at #{position_of(tile)} into the empty space #{gap} in board:\n#{self}"
         end
